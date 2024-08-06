@@ -40,12 +40,32 @@ class MainView:
         self.refresh_folders()
 
     def create_task(self):
-        title = self.title_entry.get()
-        description = self.description_entry.get()
-        due_date = self.due_date_entry.get_date()
-        folder_id = None  # Update this to select a folder
-        self.task_controller.create_task(title, description, due_date, folder_id)
-        self.refresh_tasks()
+        create_task_window = tk.Toplevel(self.root)
+        create_task_window.title("Create Task")
+
+        tk.Label(create_task_window, text="Title:").pack()
+        title_entry = tk.Entry(create_task_window)
+        title_entry.pack()
+
+        tk.Label(create_task_window, text="Description:").pack()
+        description_entry = tk.Entry(create_task_window)
+        description_entry.pack()
+
+        tk.Label(create_task_window, text="Due Date:").pack()
+        due_date_entry = DateEntry(create_task_window)
+        due_date_entry.pack()
+
+        def save_task():
+            title = title_entry.get()
+            description = description_entry.get()
+            due_date = due_date_entry.get_date()
+            folder_id = None  # Update this to allow folder selection
+            self.task_controller.create_task(title, description, due_date, folder_id)
+            self.refresh_tasks()
+            create_task_window.destroy()
+
+        tk.Button(create_task_window, text="Save Task", command=save_task).pack()
+
 
     def create_folder(self):
         name = "New Folder"
