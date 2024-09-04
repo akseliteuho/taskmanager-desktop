@@ -10,3 +10,6 @@ class TaskController:
     def get_tasks(self):
         return Task.get_all_tasks()
 
+    # Poistetaan tehtävä tietokannasta, kutsumalla Task luokan delete_task metodia
+    def delete_task(self, task_id):
+        return Task.delete_task(task_id)

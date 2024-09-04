@@ -22,10 +22,6 @@ class MainView:
     # Metodi luo GUI:n komponentit.
     def create_widgets(self):
 
-        tk.Label(self.root, text="Due Date").pack() # Luodaan tekstikomponentti, jossa lukee "Due Date".
-        self.due_date_entry = DateEntry(self.root) # Luodaan DateEntry-komponentti, joka mahdollistaa päivämäärän valitsemisen.
-        self.due_date_entry.pack() # pack() metodi GUI komponentin asettamiseen oikeaan paikkaan.
-
         # Luodaan painike, joka kutsuu create_task metodia ja mahdollistaa uuden tehtävän luomisen.
         self.create_task_button = tk.Button(self.root, text="Create Task", command=self.create_task)
         self.create_task_button.pack()
@@ -37,6 +33,10 @@ class MainView:
         # Luodaan Listbox-komponentti, johon lisätään tehtävät.
         self.tasks_listbox = tk.Listbox(self.root)
         self.tasks_listbox.pack(fill=tk.BOTH, expand=True)
+
+        # Luodaan painike, joka kutsuu delete_task metodia ja mahdollistaa tehtävän poistamisen.
+        self.delete_task_button = tk.Button(self.root, text="Delete Task", command=self.delete_task)
+        self.delete_task_button.pack()
 
         # Luodaan Listbox-komponentti, johon lisätään kansiot.
         self.folders_listbox = tk.Listbox(self.root)
@@ -83,6 +83,33 @@ class MainView:
         # Luodaan painike, joka kutsuu save_task metodia ja mahdollistaa tehtävän tallentamisen.
         tk.Button(create_task_window, text="Save Task", command=save_task).pack()
 
+    def delete_task(self):
+        # Haetaan valitun tehtävän ID Listbox-komponentista.
+        selected_task_id = self.tasks_listbox.curselection()
+        print(selected_task_id)
+        if selected_task_id:
+            # Haetaan valitun tehtävän sisältö (otsikko ja due date).
+            task_text = self.tasks_listbox.get(selected_task_id)
+            print(task_text)
+            # Haetaan tehtävän otsikko poistamalla ylimääräinen sisältö task_text.
+            task_title = task_text.split(",")[0]
+            print(task_title)
+            # Haetaan tehtävä tietokannasta task_controllerin get_tasks metodilla.
+            tasks = self.task_controller.get_tasks()
+            # Etsitään tehtävä, jonka otsikko vastaa valitun tehtävän otsikkoa.
+            task_to_delete = next((task for task in tasks if task[2] == task_title), None)
+
+            # Jos tehtävä löytyy, poistetaan se tietokannasta task_controllerin avulla (joka käyttää task modelissa olevaa poisto metodia).
+            if task_to_delete:
+                task_id = task_to_delete[0] # Haetaan tehtävän ID.
+                self.task_controller.delete_task(task_id)
+                self.refresh_tasks()
+            else:
+                messagebox.showerror("Error", "Task not found")
+        else:
+            messagebox.showerror("Error", "Select a task to delete")
+
+
 
     # Metodi avaa uuden ikkunan, jossa käyttäjä voi luoda uuden kansion.
     def create_folder(self):
@@ -119,7 +146,7 @@ class MainView:
 
         # Lisätään tehtävät Listbox-komponenttiin.
         for task in tasks:
-            task_display = f"Title: {task[2]}, Due Date: {task[4]}" # Muodostetaan tehtävän tiedot merkkijonoksi.
+            task_display = f"{task[2]}, Due Date: {task[4]}" # Muodostetaan tehtävän tiedot merkkijonoksi.
             self.tasks_listbox.insert(tk.END, task_display) # Lisätään tehtävä Listbox-komponenttiin.
 
     # Metodi päivittää kansiot GUI:ssa.
