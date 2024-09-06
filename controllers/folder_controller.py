@@ -9,3 +9,6 @@ class FolderController:
     def get_folders(self):
         return Folder.get_all_folders()
 
+    # Poistetaan kansio kansio tietokannasta, kutsumalla folder modelissa olevaa delete_folder metodia
+    def delete_folder(self, folder_id):
+        return Folder.delete_folder(folder_id)

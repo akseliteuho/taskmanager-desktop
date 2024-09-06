@@ -26,17 +26,21 @@ class MainView:
         self.create_task_button = tk.Button(self.root, text="Create Task", command=self.create_task)
         self.create_task_button.pack()
 
-        # Luodaan painike, joka kutsuu create_folder metodia ja mahdollistaa uuden kansion luomisen.
-        self.create_folder_button = tk.Button(self.root, text="Create Folder", command=self.create_folder)
-        self.create_folder_button.pack()
+        # Luodaan painike, joka kutsuu delete_task metodia ja mahdollistaa tehtävän poistamisen.
+        self.delete_task_button = tk.Button(self.root, text="Delete Task", command=self.delete_task)
+        self.delete_task_button.pack()
 
         # Luodaan Listbox-komponentti, johon lisätään tehtävät.
         self.tasks_listbox = tk.Listbox(self.root)
         self.tasks_listbox.pack(fill=tk.BOTH, expand=True)
 
-        # Luodaan painike, joka kutsuu delete_task metodia ja mahdollistaa tehtävän poistamisen.
-        self.delete_task_button = tk.Button(self.root, text="Delete Task", command=self.delete_task)
-        self.delete_task_button.pack()
+        # Luodaan painike, joka kutsuu create_folder metodia ja mahdollistaa uuden kansion luomisen.
+        self.create_folder_button = tk.Button(self.root, text="Create Folder", command=self.create_folder)
+        self.create_folder_button.pack()
+
+        # Luodaan painike, joka kutsuu delete_folder metodia ja mahdollistaa kansion poistamisen.
+        self.delete_folder_button = tk.Button(self.root, text="Delete Folder", command=self.delete_folder)
+        self.delete_folder_button.pack()
 
         # Luodaan Listbox-komponentti, johon lisätään kansiot.
         self.folders_listbox = tk.Listbox(self.root)
@@ -138,6 +142,23 @@ class MainView:
         # Luodaan painike, joka kutsuu save_folder metodia ja mahdollistaa kansion tallentamisen.
         tk.Button(create_folder_window, text="Save Folder", command=save_folder).pack() 
 
+    def delete_folder(self):
+        # Haetaan valitun kansion ID Listbox-komponentista.
+        selected_folder_id = self.folders_listbox.curselection()
+        if selected_folder_id:
+            # Haetaan valitun kansion nimi Listbox-komponentista.
+            folder_name = self.folders_listbox.get(selected_folder_id)
+            # Haetaan kaikki kansiot tietokannasta folder_controllerin get_folders metodilla.
+            folders = self.folder_controller.get_folders()
+            # Etsitään kansio, jonka nimi vastaa valitun kansion nimeä.
+            folder_to_delete = next((folder for folder in folders if folder[1] == folder_name), None)
+
+            # Jos kansio löytyy, poistetaan se tietokannasta folder_controllerin avulla (joka käyttää folder modelissa olevaa poisto metodia).
+            if folder_to_delete:
+                folder_id = folder_to_delete[0]
+                self.folder_controller.delete_folder(folder_id)
+                self.refresh_folders()
+
     # Metodi päivittää tehtävät GUI:ssa.
     def refresh_tasks(self):
         self.tasks_listbox.delete(0, tk.END) # Tyhjennetään tehtävälista.
@@ -146,7 +167,7 @@ class MainView:
 
         # Lisätään tehtävät Listbox-komponenttiin.
         for task in tasks:
-            task_display = f"{task[2]}, Due Date: {task[4]}" # Muodostetaan tehtävän tiedot merkkijonoksi.
+            task_display = f"{task[2]}, {task[3]}, Due Date: {task[4]}" # Muodostetaan tehtävän tiedot merkkijonoksi.
             self.tasks_listbox.insert(tk.END, task_display) # Lisätään tehtävä Listbox-komponenttiin.
 
     # Metodi päivittää kansiot GUI:ssa.

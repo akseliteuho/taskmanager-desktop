@@ -20,3 +20,9 @@ class Folder:
         cursor = db.conn.execute("SELECT * FROM folders")
         return cursor.fetchall()
 
+    # Poistetaan kansio tietokannasta kansion ID:n perusteella
+    @staticmethod
+    def delete_folder(folder_id): 
+        db = Database() # Luodaan tietokanta yhteys
+        with db.conn: # Avataan tietokanta yhteys
+            db.conn.execute("DELETE FROM folders WHERE id = ?", (folder_id,)) # Poistetaan kansio tietokannasta SQL kyselyllä
