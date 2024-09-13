@@ -46,6 +46,9 @@ class MainView:
         self.folders_listbox = tk.Listbox(self.root)
         self.folders_listbox.pack(fill=tk.BOTH, expand=True)
 
+        # Listbox-komponenttiin lisätään tapahtumankäsittelijä, joka kutsuu display_tasks_in_folder metodia, kun käyttäjä valitsee kansion.
+        self.folders_listbox.bind("<<ListboxSelect>>", self.display_tasks_in_folder)
+
         # Päivitetään tehtävät ja kansiot, jotta ne saadaan näkyviin.
         self.refresh_tasks()
         self.refresh_folders()
@@ -72,20 +75,53 @@ class MainView:
         due_date_entry = DateEntry(create_task_window)
         due_date_entry.pack()
 
+        # Tekstikenttä tehtävän kansioon liittämistä varten.
+        tk.Label(create_task_window, text="Select Folder:").pack() 
+        folder_selection = tk.Listbox(create_task_window, height=5)
+
+        folders = self.folder_controller.get_folders() # Haetaan kaikki kansiot tietokannasta.
+        folder_ids = [] # Luodaan lista, johon tallennetaan kansio id:t.
+        for folder in folders:
+            folder_selection.insert(tk.END, folder[1]) # Lisätään kansion nimi Listbox-komponenttiin. 
+            folder_ids.append(folder[0]) # Lisätään kansio id folder_ids listaan.
+
+        folder_selection.pack()
 
         #Metodi, jonka avulla uusi tehtövö voidaaan luoda ja tallentaa.
         def save_task():
-            
             title = title_entry.get() # Haetaan tehtävän nimi tekstikentästä.
             description = description_entry.get() # Haetaan tehtävän kuvaus tekstikentästä.
             due_date = due_date_entry.get_date() # Haetaan tehtävän deadline DateEntry-komponentista.
-            folder_id = None  
+
+            selected_folder_id = folder_selection.curselection() # Haetaan valitun kansion ID Listbox-komponentista.
+            if selected_folder_id:
+                folder_id = folder_ids[selected_folder_id[0]] # Haetaan valitun kansion ID.
+                print(f"Folder ID is {folder_id}")
+            else:
+                folder_id = None  
+                print("No folder selected")
             self.task_controller.create_task(title, description, due_date, folder_id) # Kutsutaan TaskControllerin create_task metodia, jotta tehtävä tallennetaan tietokantaan.
             self.refresh_tasks() # Päivitetään tehtävälista GUI:ssa.
             create_task_window.destroy() # Suljetaan ikkuna destroy() metodilla.
 
         # Luodaan painike, joka kutsuu save_task metodia ja mahdollistaa tehtävän tallentamisen.
         tk.Button(create_task_window, text="Save Task", command=save_task).pack()
+
+    def display_tasks_in_folder(self, event):
+        # Haetaan valitun kansion ID Listbox-komponentista.
+        selected_folder_id = self.folders_listbox.curselection()
+        print(selected_folder_id)
+
+        if selected_folder_id:
+            folder_id = self.folder_ids[selected_folder_id[0]] # Haetaan valitun kansion ID listasta.
+            print(folder_id)
+            tasks = self.task_controller.get_tasks_by_folder_id(folder_id) # Haetaan kaikki kansion tehtävät tietokannasta.
+            print(tasks)
+            self.tasks_listbox.delete(0, tk.END) # Tyhjennetään tehtävälista.
+            for task in tasks:
+                task_display = f"{task[2]}, {task[3]}, Due Date: {task[4]}" # Muodostetaan tehtävän tiedot merkkijonoksi.
+                self.tasks_listbox.insert(tk.END, task_display) # Lisätään tehtävä Listbox-komponenttiin.
+
 
     def delete_task(self):
         # Haetaan valitun tehtävän ID Listbox-komponentista.
@@ -176,6 +212,9 @@ class MainView:
 
         folders = self.folder_controller.get_folders() # Haetaan kaikki kansiot tietokannasta.
 
+        self.folder_ids = [] # Luodaan lista, johon tallennetaan kansio id:t.
+
         # Lisätään kansiot Listbox-komponenttiin.
         for folder in folders:
-            self.folders_listbox.insert(tk.END, folder[1]) 
+            self.folders_listbox.insert(tk.END, folder[1]) # Lisätään kansion nimi Listbox-komponenttiin.
+            self.folder_ids.append(folder[0]) # Lisätään kansion id listaan, jotta sitä voidaan käyttää tehtävän määrämisessä oikeaan kansioon.

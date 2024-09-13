@@ -27,6 +27,13 @@ class Task:
         cursor = db.conn.execute("SELECT * FROM tasks") # Haetaan kaikki tehtävät tietokannasta SQL kyselyllä
         return cursor.fetchall() # Palautetaan kaikki tehtävät listana
 
+    # Haetaan tehtävät kansion ID:n perusteella
+    @staticmethod
+    def get_tasks_by_folder_id(folder_id):
+        db = Database() # Luodaan tiedokanta yhteys luomalla Database luokan instanssi
+        cursor = db.conn.execute("SELECT * FROM tasks WHERE folder_id = ?", (folder_id,)) # Haetaan tehtävät kansion ID:n perusteella SQL kyselyllä
+        return cursor.fetchall() # Palautetaan tehtävät listana
+
     # Poistetaan tehtävä tietokannasta tehtävän ID:n perusteella
     @staticmethod
     def delete_task(task_id):
