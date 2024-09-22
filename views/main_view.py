@@ -3,6 +3,8 @@ from tkinter import messagebox
 from tkcalendar import DateEntry
 from controllers.task_controller import TaskController
 from controllers.folder_controller import FolderController
+from datetime import datetime
+from utils.notifications import show_notification
 
 # MainView luokka on vastuussa käyttöliittymän alustamisesta ja hallitsemisesta.
 class MainView:
@@ -18,6 +20,8 @@ class MainView:
         # Kutsutaan create_widgets -metodia, joka luo GUI:n komponentit.
         self.create_widgets()
 
+        # Kutsutaan check_due_dates metodia, joka tarkistaa onko tehtävän deadline mennyt.
+        self.check_due_dates()
 
     # Metodi luo GUI:n komponentit.
     def create_widgets(self):
@@ -42,6 +46,11 @@ class MainView:
         self.delete_folder_button = tk.Button(self.root, text="Delete Folder", command=self.delete_folder)
         self.delete_folder_button.pack()
 
+        # Luodaan painike, joka kutsuu show_all_tasks metodia ja mahdollistaa palaamisen alkunäyttötilaan.
+        self.return_to_mainview_button = tk.Button(self.root, text="Return to Main View", command=self.show_all_tasks)
+        self.return_to_mainview_button.pack()
+        self.return_to_mainview_button.pack_forget() # Piilotetaan painike, kun se ei ole tarpeellinen, eli kun palataan päänäyttöön.
+
         # Luodaan Listbox-komponentti, johon lisätään kansiot.
         self.folders_listbox = tk.Listbox(self.root)
         self.folders_listbox.pack(fill=tk.BOTH, expand=True)
@@ -53,6 +62,16 @@ class MainView:
         self.refresh_tasks()
         self.refresh_folders()
 
+    def check_due_dates(self):
+        tasks = self.task_controller.get_tasks() # Haetaan kaikki tehtävät tietokannasta.
+        Date_today = datetime.now().date() # Haetaan tämän päivän päivämäärä.
+
+        # Käydään läpi kaikki tehtävät.
+        for task in tasks:
+            due_date = datetime.strptime(task[4], "%Y-%m-%d").date() # Haetaan tehtävän deadline päivämäärä ja muutetaan se date-olioksi.
+            # Jos tehtävän deadline on mennyt, näytetään ilmoitus.
+            if due_date == Date_today:
+                show_notification("Task due", f"This task is due today!\n {task[2]}")
 
     # Metodi avaa uuden ikkunan, jossa käyttäjä voi luoda uuden tehtävän.
     def create_task(self):
@@ -70,10 +89,11 @@ class MainView:
         description_entry = tk.Entry(create_task_window)
         description_entry.pack()
 
-        # Luodaan DateEntry-komponentti, joka mahdollistaa dl. päivämäärän valitsemisen uuteen tehtävään.
+        # Luodaan DateEntry-komponentti kalenteriin, joka mahdollistaa dl. päivämäärän valitsemisen uuteen tehtävään.
         tk.Label(create_task_window, text="Due Date:").pack()
-        due_date_entry = DateEntry(create_task_window)
-        due_date_entry.pack()
+        due_date_entry = DateEntry(create_task_window, width=12, background='darkblue', foreground='white', borderwidth=2)
+        due_date_entry.pack(pady=20)
+        due_date_entry.focus_set()
 
         # Tekstikenttä tehtävän kansioon liittämistä varten.
         tk.Label(create_task_window, text="Select Folder:").pack() 
@@ -117,6 +137,9 @@ class MainView:
             print(folder_id)
             tasks = self.task_controller.get_tasks_by_folder_id(folder_id) # Haetaan kaikki kansion tehtävät tietokannasta.
             print(tasks)
+
+            self.return_to_mainview_button.pack() # Näytetään painike, joka mahdollistaa palaamisen alkunäyttötilaan.
+
             self.tasks_listbox.delete(0, tk.END) # Tyhjennetään tehtävälista.
             for task in tasks:
                 task_display = f"{task[2]}, {task[3]}, Due Date: {task[4]}" # Muodostetaan tehtävän tiedot merkkijonoksi.
@@ -149,6 +172,11 @@ class MainView:
         else:
             messagebox.showerror("Error", "Select a task to delete")
 
+    # Metodi näyttää kaikki tehtävät GUI:ssa, käytetään kun halutaan palata alkunäyttötilaan folder näkymästä.
+    def show_all_tasks(self):
+
+        self.return_to_mainview_button.pack_forget() # Piilotetaan painike, kun se ei ole tarpeellinen, eli kun palataan päänäyttöön.
+        self.refresh_tasks() # Päivitetään tehtävät GUI:ssa.
 
 
     # Metodi avaa uuden ikkunan, jossa käyttäjä voi luoda uuden kansion.
@@ -195,7 +223,7 @@ class MainView:
                 self.folder_controller.delete_folder(folder_id)
                 self.refresh_folders()
 
-    # Metodi päivittää tehtävät GUI:ssa.
+    # Metodi päivittää tehtävät GUI:ssa, jotta ne näkyvät oikein.
     def refresh_tasks(self):
         self.tasks_listbox.delete(0, tk.END) # Tyhjennetään tehtävälista.
 
@@ -206,7 +234,7 @@ class MainView:
             task_display = f"{task[2]}, {task[3]}, Due Date: {task[4]}" # Muodostetaan tehtävän tiedot merkkijonoksi.
             self.tasks_listbox.insert(tk.END, task_display) # Lisätään tehtävä Listbox-komponenttiin.
 
-    # Metodi päivittää kansiot GUI:ssa.
+    # Metodi päivittää kansiot GUI:ssa, jotta ne näkyvät oikein.
     def refresh_folders(self):
         self.folders_listbox.delete(0, tk.END) # Tyhjennetään kansioiden lista.
 
