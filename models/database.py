@@ -1,28 +1,33 @@
-import sqlite3
-
+# luokka Database määrittelee rajapinnan tietokannan käyttöön käyttäessä valittua tietokantaa
 class Database:
-    def __init__(self, db_name="tasks.db"):
-        self.conn = sqlite3.connect(db_name) # Yhdistetään tietokantaan
-        self.create_tables() # Kutsutaan create_tables metodia, joka luo tietokannan taulut
 
-    # Tietokannan taulujen luonti
-    def create_tables(self):
-        with self.conn: # Avataan tietokanta yhteys käyttäen context manageria
-            # Luodaan kansiot taulu
-            self.conn.execute(
-                """CREATE TABLE IF NOT EXISTS folders (
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    name TEXT NOT NULL
-                )"""
-            )
-            # Luodaan tehtävät taulu
-            self.conn.execute(
-                """CREATE TABLE IF NOT EXISTS tasks (
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    folder_id INTEGER,
-                    title TEXT NOT NULL,
-                    description TEXT,
-                    due_date TEXT,
-                    FOREIGN KEY(folder_id) REFERENCES folders(id)
-                )"""
-            )
+    # Määritellään rajapinnan metodit, joita käytettävän tietokanta luokan tulee toteuttaa
+    # NotImplementedError poikkeus heitetään, jos metodia ei ole toteuteta perivässä luokassa,
+    # jolloin varmistetaan, että perivä luokka toteuttaa rajapinnan metodit oikein
+
+    # Taskeihin liittyvät metodit
+    def get_tasks(self):
+        raise NotImplementedError("This method must be overridden by subclasses")
+
+    def create_task(self, title, description, due_date, folder_id):
+        raise NotImplementedError("This method must be overridden by subclasses")
+
+    def get_tasks_by_folder(self, folder_id):
+        raise NotImplementedError("This method must be overridden by subclasses")
+
+    def delete_task(self, task_id):
+        raise NotImplementedError("This method must be overridden by subclasses")
+
+
+    # Folderiin liittyvät metodit
+    def get_folders(self):
+        raise NotImplementedError("This method must be overridden by subclasses")
+
+    def create_folder(self, name):
+        raise NotImplementedError("This method must be overridden by subclasses")
+
+    def get_folder_by_id(self, folder_id):
+        raise NotImplementedError("This method must be overridden by subclasses")
+
+    def delete_folder(self, folder_id):
+        raise NotImplementedError("This method must be overridden by subclasses")
