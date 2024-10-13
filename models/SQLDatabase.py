@@ -1,7 +1,7 @@
 import sqlite3
 
-# Periytetään Database luokka SQLDatabase luokasta
-class Database():
+# Luodaan SQLDatabase luokka
+class SQLDatabase():
     def __init__(self, db_name="tasks.db"): # Initalisoidaan SQLite tietokanta
         self.conn = sqlite3.connect(db_name) # Yhdistetään tietokantaan 
         self.create_tables() # Luodaan tietokannan taulut
@@ -28,5 +28,4 @@ class Database():
                 )"""
             )
 
-
-  
+    

@@ -1,5 +1,5 @@
 import tkinter as tk
-from views.main_view import MainView
+from views.MainView import MainView
 
 # MainView luokka on vastuussa käyttöliittymän alustamisesta ja hallitsemisesta.
 if __name__ == "__main__":

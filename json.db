@@ -1,0 +1,32 @@
+{
+    "folders": [
+        {
+            "id": 1,
+            "name": "New folder"
+        },
+        {
+            "id": 2,
+            "name": "Anohter folder"
+        },
+        {
+            "id": 3,
+            "name": "Poistetaan"
+        }
+    ],
+    "tasks": [
+        {
+            "id": 1,
+            "title": "New JSON task",
+            "description": "Testing in folder",
+            "due_date": "2024-10-15",
+            "folder_id": 1
+        },
+        {
+            "id": 2,
+            "title": "Second JSON task",
+            "description": "Testing without folder",
+            "due_date": "2024-10-15",
+            "folder_id": null
+        }
+    ]
+}
