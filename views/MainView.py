@@ -26,7 +26,6 @@ class MainView:
         tk.Label(database_selection_window, text="Select database type").pack(pady=10)
 
         # Lambda funktion avulla initialize_db ajetaan vasta, kun painiketta painetaan.
-
         # Luodaan painike SQL tietokannan valintaa varten.
         sql_button = tk.Button(database_selection_window, text="SQL Database", command=lambda: self.initialize_database('SQL', database_selection_window))
         sql_button.pack()
@@ -101,15 +100,15 @@ class MainView:
         for task in tasks:
             # JSON tehtävien tarkisus
             if isinstance(task, dict):
-                due_date = datetime.strptime(task['due_date'], "%Y-%m-%d").date()
+                due_date = datetime.strptime(task['due_date'], "%Y-%m-%d").date() # Muodostetaan tehtävän tiedot merkkijonoksi.
             
             # SQL tehtävien tarkistus
             elif isinstance(task, tuple):
-                due_date = datetime.strptime(task[4], "%Y-%m-%d").date() # Haetaan tehtävän deadline päivämäärä ja muutetaan se date-olioksi.
+                due_date = datetime.strptime(task[4], "%Y-%m-%d").date() # Muodostetaan tehtävän tiedot merkkijonoksi.
             
             # Jos tehtävän deadline on mennyt, näytetään ilmoitus.
             if due_date == today:
-                show_notification("Task due", f"This task is due today!\n {task['title'] if isinstance(task, dict) else task[2]}") 
+                show_notification("Task due", f"This task is due today!\n {task['title'] if isinstance(task, dict) else task[2]}")  # Kutsutaan show_notification metodia, joka näyttää ilmoituksen ja valitaan JSON tai SQL tehtävä
 
 
     # Metodi avaa uuden ikkunan, jossa käyttäjä voi luoda uuden tehtävän.
