@@ -128,20 +128,15 @@ class MainView:
         tk.Label(create_task_window, text="Select Folder:").pack() 
         folder_selection = tk.Listbox(create_task_window, height=5)
 
-        folders = self.folder_controller.get_folders() # Haetaan kaikki kansiot tietokannasta.
+        # Haetaan kaikki kansiot, jotta ne voidaan lisätä Listbox-komponenttiin.
+        folders = self.folder_controller.folders_for_selection()
         folder_ids = [] # Luodaan lista, johon tallennetaan kansio id:t.
 
+        # Käydään läpi kaikki kansiot ja lisätään ne Listbox-komponenttiin.
         for folder in folders:
-            # JSON kansiot ovat dict muodossa, joten tarkistetaan onko kansio dict vai tuple.
-            if isinstance(folder, dict):
-                folder_selection.insert(tk.END, folder['name']) # Lisätään kansion nimi Listbox-komponenttiin.
-                folder_ids.append(folder['id']) # Lisätään kansio id folder_ids listaan.
-            
-            # SQL kansiot ovat tuple muodossa, joten tarkistetaan onko kansio dict vai tuple.
-            elif isinstance(folder, tuple):
-                folder_selection.insert(tk.END, folder[1]) # Lisätään kansion nimi Listbox-komponenttiin. 
-                folder_ids.append(folder[0]) # Lisätään kansio id folder_ids listaan.
-
+            folder_selection.insert(tk.END, folder['name']) # Lisätään kansio Listbox-komponenttiin.
+            folder_ids.append(folder['id']) # Lisätään kansio id folder_ids listaan.
+   
         folder_selection.pack()
 
         #Metodi, jonka avulla uusi tehtövö voidaaan luoda ja tallentaa.
@@ -171,9 +166,11 @@ class MainView:
         print(selected_folder_id)
 
         if selected_folder_id:
-            folder_id = self.folder_ids[selected_folder_id[0]] # Haetaan valitun kansion ID listasta.
+            # Haetaan valitun kansion ID listasta.
+            folder_id = self.folder_ids[selected_folder_id[0]]
             print(folder_id)
-            tasks = self.task_controller.get_tasks_by_folder_id(folder_id) # Haetaan kaikki kansion tehtävät tietokannasta.
+            # Haetaan kaikki kansion tehtävät tietokannasta.
+            tasks = self.task_controller.get_tasks_by_folder_id(folder_id)
             print(tasks)
 
             self.return_to_mainview_button.pack() # Näytetään painike, joka mahdollistaa palaamisen alkunäyttötilaan.
@@ -181,14 +178,8 @@ class MainView:
             self.tasks_listbox.delete(0, tk.END) # Tyhjennetään tehtävälista.
 
             for task in tasks:
-                # Hoidetaan JSON tehtävät
-                if isinstance(task, dict):
-                    task_display = f"{task['title']}, {task['description']}, Due Date: {task['due_date']}" # Muodostetaan tehtävän tiedot merkkijonoksi.
-                
-                # Hoidetaan SQL tehtävät
-                elif isinstance(task, tuple):
-                    task_display = f"{task[2]}, {task[3]}, Due Date: {task[4]}" # Muodostetaan tehtävän tiedot merkkijonoksi.
-
+                # Muodostetaan tehtävän tiedot merkkijonoksi.
+                task_display = f"{task['title']}, {task['description']}, Due Date: {task['due_date']}"
                 self.tasks_listbox.insert(tk.END, task_display) # Lisätään tehtävä Listbox-komponenttiin.
 
 
@@ -196,6 +187,7 @@ class MainView:
         # Haetaan valitun tehtävän ID Listbox-komponentista.
         selected_task_id = self.tasks_listbox.curselection()
         print(selected_task_id)
+
         if selected_task_id:
             # Haetaan valitun tehtävän sisältö (otsikko ja due date).
             task_text = self.tasks_listbox.get(selected_task_id)
@@ -203,27 +195,13 @@ class MainView:
             # Haetaan tehtävän otsikko poistamalla ylimääräinen sisältö task_text.
             task_title = task_text.split(",")[0]
             print(task_title)
-            # Haetaan tehtävä tietokannasta task_controllerin get_tasks metodilla.
-            tasks = self.task_controller.get_tasks()
+            # Haetaan tehtävä tietokannasta task_controllerin avulla.
+            task_to_delete = self.task_controller.delete_task_by_title(task_title)
 
-            # Etsitään poistettava tehtävä.
-            task_to_delete = None
-            for task in tasks:
-                # JSON tehtävät ovat dict muodossa, joten tarkistetaan onko tehtävä dict vai tuple.
-                if isinstance(task, dict):
-                    if task['title'] == task_title:
-                        task_to_delete = task
-                        break # poistutaan silmukasta, kun tehtävä on löytynyt.
-
-                # SQL tehtävät ovat tuple muodossa, joten tarkistetaan onko tehtävä dict vai tuple
-                elif isinstance(task, tuple):
-                    if task[2] == task_title:
-                        task_to_delete = task
-                        break # poistutaan silmukasta, kun tehtävä on löytynyt.
             
-            # Jos tehtävä löytyy, poistetaan se tietokannasta task_controllerin avulla (joka käyttää task modelissa olevaa poisto metodia).
+            # Jos tehtävä löytyy, poistetaan se tietokannasta task_controllerin avulla.
             if task_to_delete:
-                task_id = task_to_delete['id'] if isinstance(task_to_delete, dict) else task_to_delete[0] # Haetaan oikea tehtävä
+                task_id = task_to_delete['id'] # Tallennetaan tehtävän ID muuttujaan.
                 self.task_controller.delete_task(task_id) # Poistetaan tehtävä tietokannasta.
                 self.refresh_tasks() # Päivitetään tehtävät GUI:ssa.
             else:
@@ -289,40 +267,25 @@ class MainView:
     # Metodi päivittää tehtävät GUI:ssa, jotta ne näkyvät oikein.
     def refresh_tasks(self):
         self.tasks_listbox.delete(0, tk.END) # Tyhjennetään tehtävälista.
-
         tasks = self.task_controller.get_tasks() # Haetaan kaikki tehtävät tietokannasta.
 
         # Lisätään tehtävät Listbox-komponenttiin.
         for task in tasks:
-            # JSON tietokannassa tehtävät ovat dict muodossa, joten tarkistetaan onko tehtävä dict vai tuple.
-            if isinstance(task, dict):
-                task_display = f"{task['title']}, {task['description']}, Due Date: {task['due_date']}" # Muodostetaan tehtävän tiedot merkkijonoksi.
-            # SQL tietokannassa tehtävät ovat tuple muodossa, joten tarkistetaan onko tehtävä dict vai tuple.
-            elif isinstance(task, tuple):
-                task_display = f"{task[2]}, {task[3]}, Due Date: {task[4]}" # Muodostetaan tehtävän tiedot merkkijonoksi.
-
+            task_display = f"{task['title']}, {task['description']}, Due Date: {task['due_date']}" # Muodostetaan tehtävän tiedot merkkijonoksi.
             self.tasks_listbox.insert(tk.END, task_display) # Lisätään tehtävä Listbox-komponenttiin.
 
 
     # Metodi päivittää kansiot GUI:ssa, jotta ne näkyvät oikein.
     def refresh_folders(self):
         self.folders_listbox.delete(0, tk.END) # Tyhjennetään kansioiden lista.
-
         folders = self.folder_controller.get_folders() # Haetaan kaikki kansiot tietokannasta.
 
         self.folder_ids = [] # Luodaan lista, johon tallennetaan kansio id:t.
 
         # Lisätään kansiot Listbox-komponenttiin.
         for folder in folders:
-            # JSON tietokannassa kansiot ovat dict muodossa, joten tarkistetaan onko kansio dict vai tuple.
-            if isinstance(folder, dict):
-                folder_name = folder['name']
-                folder_id = folder['id']
-
-            # SQL tietokannassa kansiot ovat tuple muodossa, joten tarkistetaan onko kansio dict vai tuple.
-            elif isinstance(folder, tuple):
-                folder_name = folder[1]
-                folder_id = folder[0]
+            folder_name = folder['name']
+            folder_id = folder['id']
 
             self.folders_listbox.insert(tk.END, folder_name) # Lisätään kansio Listbox-komponenttiin.
             self.folder_ids.append(folder_id) # Lisätään kansio id folder_ids listaan.

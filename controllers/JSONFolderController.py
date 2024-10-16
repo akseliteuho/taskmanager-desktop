@@ -6,6 +6,21 @@ class JSONFolderController:
         folder = JSONFolder(name)
         folder.save()
 
+
+    # Metodi, joka palauttaa kaikki kansiot listana, jotta taskeja voidaan lisätä niihin
+    def folders_for_selection(self):
+        folders = JSONFolder.get_all_folders() # Haetaan kaikki kansiot
+        folder_list = [] # Luodaan lista, johon lisätään kansiot
+
+        # Käydään läpi kaikki kansiot ja lisätään ne listaan
+        for folder in folders:
+            folder_list.append({
+                'id': folder["id"], # Kansion ID
+                'name': folder["name"] # Kansion nimi
+            })
+        return folder_list # Palautetaan kansiot listana
+    
+
     # Poistetaan kansio kansion nimen perusteella, kutsumalla Folder luokan delete_folder_by_name metodia
     def delete_folder_by_name(self, folder_name):
         folders = JSONFolder.get_all_folders() # Haetaan kaikki kansiot ja tallennetaan ne muuttujaan
@@ -24,13 +39,16 @@ class JSONFolderController:
         else:
             return False # Palauttaa False, jos poistettavaa kansiota ei löytynyt
 
+
     # Haetaan kaikki kansiot tietokannasta, kutsumalla Folder luokan get_all_folders metodia
     def get_folders(self):
         return JSONFolder.get_all_folders()
 
+
     # Haetaan kansio kansion ID:n perusteella, kutsumalla Folder luokan get_folder_by_id metodia
     def get_folder_by_id(self, folder_id):
         return JSONFolder.get_folder_by_id(folder_id)
+
 
     # Poistetaan kansio kansio tietokannasta, kutsumalla folder modelissa olevaa delete_folder metodia
     def delete_folder(self, folder_id):
