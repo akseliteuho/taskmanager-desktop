@@ -6,7 +6,7 @@
         },
         {
             "id": 3,
-            "name": "Poistetaan"
+            "name": "UUsi kansio"
         }
     ],
     "tasks": [
@@ -30,6 +30,13 @@
             "description": "sss",
             "due_date": "2024-10-14",
             "folder_id": 1
+        },
+        {
+            "id": 4,
+            "title": "dedis testi json",
+            "description": "kulli",
+            "due_date": "2024-10-16",
+            "folder_id": 3
         }
     ]
 }

@@ -31,5 +31,5 @@ class SQLFolder:
         db = SQLDatabase() # Luodaan tietokanta yhteys
         with db.conn: # Avataan tietokanta yhteys
             db.conn.execute("DELETE FROM folders WHERE id = ?", (folder_id,)) # Poistetaan kansio tietokannasta SQL kyselyllä
-
+        return True # Palautetaan True, jos kansio on poistettu onnistuneesti, jotta GUI toimii oikein.
     

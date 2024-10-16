@@ -1,4 +1,5 @@
 from models.JSONTask import JSONTask
+from datetime import datetime
 
 class JSONTaskController:
     # Luodaan uusi tehtävä ja tallennetaan se tietokantaan
@@ -17,3 +18,14 @@ class JSONTaskController:
     # Poistetaan tehtävä tietokannasta, kutsumalla Task luokan delete_task metodia
     def delete_task(self, task_id):
         return JSONTask.delete_task(task_id)
+    
+    def get_tasks_due_today(self):
+        tasks = JSONTask.get_all_tasks() # Haetaan kaikki tehtävät
+        today = datetime.now().date() # Haetaan tämän päivän päivämäärä
+        due_today = [] # Luodaan lista, johon lisätään erääntyvät tehtävät
+
+        for task in tasks:
+            due_date = datetime.strptime(task["due_date"], "%Y-%m-%d").date() # Muodonmuutos päivämäärästä string muotoon
+            if due_date == today: # Tarkistetaan, onko tehtävän deadline tänään
+                due_today.append(task) # Lisätään tehtävä listaan, jos sen deadline on tänään
+        return due_today # Palautetaan erääntyvät tehtävät listana

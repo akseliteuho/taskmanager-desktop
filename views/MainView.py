@@ -93,23 +93,14 @@ class MainView:
 
 
     def check_due_dates(self):
-        tasks = self.task_controller.get_tasks() # Haetaan kaikki tehtävät tietokannasta.
-        today = datetime.now().date() # Haetaan tämän päivän päivämäärä.
+        # Haetaan kaikki tehtävät, joiden deadline on tänään.
+        tasks_due_today = self.task_controller.get_tasks_due_today()
 
-        # Käydään läpi kaikki tehtävät.
-        for task in tasks:
-            # JSON tehtävien tarkisus
-            if isinstance(task, dict):
-                due_date = datetime.strptime(task['due_date'], "%Y-%m-%d").date() # Muodostetaan tehtävän tiedot merkkijonoksi.
-            
-            # SQL tehtävien tarkistus
-            elif isinstance(task, tuple):
-                due_date = datetime.strptime(task[4], "%Y-%m-%d").date() # Muodostetaan tehtävän tiedot merkkijonoksi.
-            
-            # Jos tehtävän deadline on mennyt, näytetään ilmoitus.
-            if due_date == today:
-                show_notification("Task due", f"This task is due today!\n {task['title'] if isinstance(task, dict) else task[2]}")  # Kutsutaan show_notification metodia, joka näyttää ilmoituksen ja valitaan JSON tai SQL tehtävä
-
+        # Käydään läpi kaikki tehtävät, joiden deadline on tänään.
+        for task in tasks_due_today:
+            # Näytetään ilmoitus, jossa kerrotaan, että tehtävän deadline on tänään.
+            show_notification("Task due", f"This task is due today!\n {task['title']}")
+ 
 
     # Metodi avaa uuden ikkunan, jossa käyttäjä voi luoda uuden tehtävän.
     def create_task(self):
@@ -282,29 +273,13 @@ class MainView:
         if selected_folder_id:
             # Haetaan valitun kansion nimi Listbox-komponentista.
             folder_name = self.folders_listbox.get(selected_folder_id)
-            # Haetaan kaikki kansiot tietokannasta folder_controllerin get_folders metodilla.
-            folders = self.folder_controller.get_folders()
 
-            # Etsitään kansio, jonka nimi vastaa valitun kansion nimeä.
-            folder_to_delete = None
-            for folder in folders:
-                # JSON kansiot ovat dict muodossa, joten tarkistetaan onko kansio dict vai tuple.
-                if isinstance(folder, dict):
-                    if folder['name'] == folder_name:
-                        folder_to_delete = folder
-                        break # poistutaan silmukasta, kun kansio on löytynyt.
-                
-                # SQL kansiot ovat tuple muodossa, joten tarkistetaan onko kansio dict vai tuple.
-                elif isinstance(folder, tuple):
-                    if folder[1] == folder_name:
-                        folder_to_delete = folder
-                        break # poistutaan silmukasta, kun kansio on löytynyt.
+            # Hoidetaan kansion poistaminen folder controllerin avulla kansion nimen perusteella.
+            folder_deletion = self.folder_controller.delete_folder_by_name(folder_name)
 
-            # Jos kansio löytyy, poistetaan se tietokannasta folder_controllerin avulla (joka käyttää folder modelissa olevaa poisto metodia).
-            if folder_to_delete:
-                folder_id = folder_to_delete['id'] if isinstance(folder_to_delete, dict) else folder_to_delete[0] # Haetaan oikea kansio
-                self.folder_controller.delete_folder(folder_id) # Poistetaan kansio tietokannasta.
-                self.refresh_folders() # Päivitetään kansioiden lista GUI:ssa.
+            # Jos kansion poisto onnistui, päivitetään kansioiden lista GUI:ssa.
+            if folder_deletion:
+                self.refresh_folders()
             else:
                 messagebox.showerror("Error", "Folder not found")
         else:

@@ -44,3 +44,4 @@ class JSONFolder:
         data = db._read_data() # Luetaan tietokannan tiedot
         data["folders"] = [folder for folder in data["folders"] if folder["id"] != folder_id] # Käydään läpi kansioden lista ja luodaan uusi, jossa ei ole poistettavaa kansiota
         db._write_data(data) # Viedään päivitetyt tiedot tietokantaan
+        return True

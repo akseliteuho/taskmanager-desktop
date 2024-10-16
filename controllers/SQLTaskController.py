@@ -1,4 +1,5 @@
 from models.SQLTask import SQLTask
+from datetime import datetime
 
 class SQLTaskController:
     # Luodaan uusi tehtävä ja tallennetaan se tietokantaan
@@ -17,3 +18,20 @@ class SQLTaskController:
     # Poistetaan tehtävä tietokannasta, kutsumalla Task luokan delete_task metodia
     def delete_task(self, task_id):
         return SQLTask.delete_task(task_id)
+    
+    # Haetaan erääntyvät tehtävät
+    def get_tasks_due_today(self):
+        tasks = SQLTask.get_all_tasks() # Haetaan kaikki tehtävät
+        today = datetime.now().date() # Haetaan tämän päivän päivämäärä
+        due_today = [] # Luodaan lista, johon lisätään erääntyvät tehtävät
+
+        # Käydään läpi kaikki tehtävät ja tarkistetaan, onko niiden deadline tänään
+        for task in tasks:
+            due_date = datetime.strptime(task[4], "%Y-%m-%d").date() # Muodonmuutos päivämäärästä string muotoon
+            if due_date == today:
+                # Lisätään tehtävä listaan, jos sen deadline on tänään
+                due_today.append({
+                    'title': task[2],
+                    'due_date': task[4]
+                }) 
+        return due_today

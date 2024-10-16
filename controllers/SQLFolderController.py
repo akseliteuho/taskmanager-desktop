@@ -5,6 +5,27 @@ class SQLFolderController:
     def create_folder(self, name):
         folder = SQLFolder(name)
         folder.save()
+
+    # Poistetaan kansio kansion nimen perusteella, kutsumalla Folder luokan delete_folder_by_name metodia
+    def delete_folder_by_name(self, folder_name):
+        # Haetaan kaikki kansiot ja tallennetaan ne muuttujaan 
+        folders = SQLFolder.get_all_folders()
+
+        # Käydään läpi kaikki kansiot muuttujassa ja etsitään poistettava kansio
+        folder_to_delete = None
+        for folder in folders:
+            # folder[1] viittaa kansion nimeen (koska kansiot palautetaan tupleina (id, name), nimi on indeksissä 1)
+            if folder[1] == folder_name: # Tarkistetaan vastaako kansio annettua nimeä
+                folder_to_delete = folder # Tallennetaan poistettava kansio muuttujaan
+                break # Poistutaan silmukasta, koska poistettava kansio on löytynyt
+        
+        # Jos kansio löytyi, poistetaan se
+        if folder_to_delete:
+            folder_id = folder_to_delete[0] # Haetaan poistettavab kansion ID
+            return SQLFolder.delete_folder(folder_id) # Palauttaa True, jos poisto onnistui
+        else:
+            return False
+
     # Haetaan kaikki kansiot tietokannasta, kutsumalla Folder luokan get_all_folders metodia
     def get_folders(self):
         return SQLFolder.get_all_folders()
