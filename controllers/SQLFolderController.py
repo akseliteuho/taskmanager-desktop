@@ -1,7 +1,7 @@
 from models.SQLFolder import SQLFolder
 
 class SQLFolderController:
-    # Luodaan uusi kansio ja tallennetaan se tietokantaan
+    # Luodaan uusi kansio ja tallennetaan se tietokantaan kutsumalla SQLFolder luokan save metodia
     def create_folder(self, name):
         folder = SQLFolder(name)
         folder.save()

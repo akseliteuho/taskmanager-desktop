@@ -2,13 +2,13 @@ import sqlite3
 
 # Luodaan SQLDatabase luokka
 class SQLDatabase():
-    def __init__(self, db_name="tasks.db"): # Initalisoidaan SQLite tietokanta
+    def __init__(self, db_name="tasks.db"): # Initalisoidaan SQLite tietokanta ja annetaan sille oletus nimi
         self.conn = sqlite3.connect(db_name) # Yhdistetään tietokantaan 
         self.create_tables() # Luodaan tietokannan taulut
 
     # Luodaan sqlite tietokannan taulut
     def create_tables(self):
-        with self.conn: # Avataan tietokanta yhteys käyttäen context manageria, joka huolehtii tietokannasta automaattisesti
+        with self.conn: # Avataan tietokanta yhteys käyttäen context manageria with, joka huolehtii tietokannasta automaattisesti
             # Luodaan kansiot taulu
             self.conn.execute(
                 """CREATE TABLE IF NOT EXISTS folders (

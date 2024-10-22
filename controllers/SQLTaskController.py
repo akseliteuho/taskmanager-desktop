@@ -2,9 +2,9 @@ from models.SQLTask import SQLTask
 from datetime import datetime
 
 class SQLTaskController:
-    # Luodaan uusi tehtävä ja tallennetaan se tietokantaan
+    # Luodaan uusi tehtävä ja tallennetaan se tietokantaan kutsumalla SQLTask luokan save metodia
     def create_task(self, title, description, due_date, folder_id):
-        task = SQLTask(title, description, due_date, folder_id)
+        task = SQLTask(title, description, due_date, folder_id) 
         task.save()
 
 

@@ -2,7 +2,7 @@ from .SQLDatabase import SQLDatabase
 
 # Task luokka, jolla hallitaan/käsitellään tehtäviä SQL tietokannassa
 class SQLTask:
-    # Konstruktori, joka initialisoi Task luokan ominaisuudet
+    # Konstruktori, joka initialisoi Task luokan ominaisuudet ja luo yhteyden tietokantaan
     def __init__(self, title, description='', due_date=None, folder_id=None):
         self.db = SQLDatabase() # Luodaan tietokanta yhteys
         self.title = title # Tehtävän otsikko
@@ -12,12 +12,12 @@ class SQLTask:
 
     # Tallennetaan tehtävä SQL tietokantaan
     def save(self):
-        with self.db.conn: # Avataan tietokanta yhteys 
+        with self.db.conn: # Avataan tietokanta yhteys with metodin avulla, joka varmistaa että kaikki tietokanta operaatiot suoritetaan oikein ja tietokanta suljetaan automaattisesti.
 
             # Lisätään tehtävä tietokantaan SQL kyselyllä
             self.db.conn.execute(
                 "INSERT INTO tasks (folder_id, title, description, due_date) VALUES (?, ?, ?, ?)",
-                (self.folder_id, self.title, self.description, self.due_date)
+                (self.folder_id, self.title, self.description, self.due_date) # Tehtävän tiedot
             )
 
     # Haetaan kaikki tehtävät tietokannasta ja palautetaan ne listana

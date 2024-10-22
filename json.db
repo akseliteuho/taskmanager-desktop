@@ -7,6 +7,10 @@
         {
             "id": 3,
             "name": "UUsi kansio"
+        },
+        {
+            "id": 4,
+            "name": "kana"
         }
     ],
     "tasks": [
@@ -25,17 +29,17 @@
             "folder_id": null
         },
         {
-            "id": 4,
-            "title": "dedis testi json",
-            "description": "kulli",
-            "due_date": "2024-10-16",
-            "folder_id": 3
-        },
-        {
             "id": 5,
             "title": "Moi",
             "description": "Moi",
             "due_date": "2024-10-18",
+            "folder_id": null
+        },
+        {
+            "id": 6,
+            "title": "uus task",
+            "description": "t\u00e4tt\u00e4r\u00e4\u00e4",
+            "due_date": "2024-10-24",
             "folder_id": null
         }
     ]

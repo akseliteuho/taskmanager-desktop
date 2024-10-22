@@ -2,13 +2,14 @@ from .SQLDatabase import SQLDatabase
 
 # Folder luokan avulla hallitaan/käsitellään kansioita.
 class SQLFolder:
-    # Konstruktori, joka saa parametrinaan kansion nimen
+    # Konstruktori, joka saa parametrinaan kansion nimen ja luo yhteyden tietokantaan
     def __init__(self, name):
         self.db = SQLDatabase() # Luodaan tietokanta yhteys
-        self.name = name 
+        self.name = name # Asetetetaan kansion nimi, joka annetaan parametrina konsruktorille
 
     # Tallennetaan kansio tietokantaan lisäämällä kansion nimi tietokantaan
     def save(self):
+        # Avataan tietokanta yhteys with metodin avulla, joka varmistaa että kaikki tietokanta operaatiot suoritetaan oikein ja tietokanta suljetaan automaattisesti.
         with self.db.conn:
             self.db.conn.execute("INSERT INTO folders (name) VALUES (?)", (self.name,))
 
@@ -19,6 +20,7 @@ class SQLFolder:
         cursor = db.conn.execute("SELECT * FROM folders") # Haetaan kaikki kansiot tietokannasta SQL kyselyllä
         return cursor.fetchall() # Palautetaan kaikki kansiot listana
     
+    # Haetaan kansio kansion nimen perusteella
     @staticmethod
     def get_folder_by_id(folder_id):
         db = SQLDatabase() # Luodaan tietokanta yhteys luomalla Database luokan instanssi

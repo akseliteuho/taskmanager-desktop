@@ -3,7 +3,7 @@ from datetime import datetime
 
 
 class JSONTaskController:
-    # Luodaan uusi tehtävä ja tallennetaan se tietokantaan
+    # Luodaan uusi tehtävä ja tallennetaan se tietokantaan kutsumalla JSONTask luokan save metodia
     def create_task(self, title, description, due_date, folder_id):
         task = JSONTask(title, description, due_date, folder_id)
         task.save()

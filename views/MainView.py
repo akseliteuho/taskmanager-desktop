@@ -11,11 +11,10 @@ from utils.notifications import show_notification
 
 # MainView luokka on vastuussa käyttöliittymän alustamisesta ja hallitsemisesta.
 class MainView:
-    # Konstruktori saa parametrinaan root-olion, joka on pääikkuna GUI:ssa.
+    # MainView luokan konstruktori, joka alustaa MainView luokan ominaisuudet, jossa root olio kuvastaa ohjelman pääikkunaa.
     def __init__(self, root):
-        self.root = root # Tallennetaan root-olio luokan muuttujaan.
+        self.root = root # Asetetaan root olio MainView luokan ominaisuudeksi, jotta sitä voidaan käyttää muissa metodeissa.
         self.root.title("Task Manager")
-
         self.database_selection() # Kutsutaan database_selection metodia, joka luo uuden ikkunan tietokannan valintaa varten.
 
     def database_selection(self):
@@ -25,17 +24,18 @@ class MainView:
 
         tk.Label(database_selection_window, text="Select database type").pack(pady=10)
 
-        # Lambda funktion avulla initialize_db ajetaan vasta, kun painiketta painetaan.
+        # Lambda funktion avulla initialize_database ajetaan vasta, kun painiketta painetaan. Ilman tätä painike ei siis toimisi oikein.
         # Luodaan painike SQL tietokannan valintaa varten.
         sql_button = tk.Button(database_selection_window, text="SQL Database", command=lambda: self.initialize_database('SQL', database_selection_window))
         sql_button.pack()
-
         # Luodaan painike JSON tietokannan valintaa varten.
         json_button = tk.Button(database_selection_window, text="JSON Database", command=lambda: self.initialize_database('JSON', database_selection_window))
         json_button.pack() 
 
 
+    # Metodi alustaa tietokannan valinnan perusteella joko SQL tai JSON tietokannan.
     def initialize_database(self, database_type, window):
+        # Luodaan TaskController ja FolderController instanssit riippuen valitusta tietokannasta.
         if database_type == 'SQL':
             self.task_controller = SQLTaskController()
             self.folder_controller = SQLFolderController()
@@ -92,13 +92,14 @@ class MainView:
         self.refresh_folders()
 
 
+    # Metodi tarkistaa onko tehtävän deadline mennyt.
     def check_due_dates(self):
-        # Haetaan kaikki tehtävät, joiden deadline on tänään.
+        # Haetaan kaikki tehtävät task_controllerin avulla, joiden deadline on tänään ja tallennetaan ne muuttujaan.
         tasks_due_today = self.task_controller.get_tasks_due_today()
 
         # Käydään läpi kaikki tehtävät, joiden deadline on tänään.
         for task in tasks_due_today:
-            # Näytetään ilmoitus, jossa kerrotaan, että tehtävän deadline on tänään.
+            # Kutsutaan show_notification metodia notifcations luokasta, ja näytetään ilmoitus, jossa kerrotaan, että tehtävän deadline on tänään.
             show_notification("Task due", f"This task is due today!\n {task['title']}")
  
 
@@ -139,18 +140,17 @@ class MainView:
    
         folder_selection.pack()
 
-        #Metodi, jonka avulla uusi tehtövö voidaaan luoda ja tallentaa.
+        #Metodi, jonka avulla uusi tehtövö voidaaan luoda ja tallentaa controller luokkien avulla.
         def save_task():
-            title = title_entry.get() # Haetaan tehtävän nimi tekstikentästä.
+            title = title_entry.get() # Haetaan tehtävän nimi tekstikentästä get() metodilla ja tallennetaan se muuttujaan.
             description = description_entry.get() # Haetaan tehtävän kuvaus tekstikentästä.
             due_date = due_date_entry.get_date() # Haetaan tehtävän deadline DateEntry-komponentista.
 
-            selected_folder_id = folder_selection.curselection() # Haetaan valitun kansion ID Listbox-komponentista.
+            selected_folder_id = folder_selection.curselection() # Haetaan valittu kansio listbox-komponentista (palautaa indeksin).
             if selected_folder_id:
-                folder_id = folder_ids[selected_folder_id[0]] # Haetaan valitun kansion ID.
-                print(f"Folder ID is {folder_id}")
+                folder_id = folder_ids[selected_folder_id[0]] # Haetaan valitun kansion ID folder_ids listasta.
             else:
-                folder_id = None  
+                folder_id = None  # Jos kansiota ei ole valittu, asetetaan folder_id arvoksi None.
                 print("No folder selected")
             self.task_controller.create_task(title, description, due_date, folder_id) # Kutsutaan TaskControllerin create_task metodia, jotta tehtävä tallennetaan tietokantaan.
             self.refresh_tasks() # Päivitetään tehtävälista GUI:ssa.
@@ -160,49 +160,57 @@ class MainView:
         tk.Button(create_task_window, text="Save Task", command=save_task).pack()
 
 
+    # Metodi näyttää kaikki tehtävät valitussa kansiossa. Koska metodi on tapahtumankäsittelijä, se saa parametrin event.
     def display_tasks_in_folder(self, event):
         # Haetaan valitun kansion ID Listbox-komponentista.
         selected_folder_id = self.folders_listbox.curselection()
         print(selected_folder_id)
 
+        # Jos kansio on valittu, haetaan kansion tehtävät ja näytetään ne GUI:ssa.
         if selected_folder_id:
-            # Haetaan valitun kansion ID listasta.
+            # Haetaan valitun kansion ID folder_ids listasta.
             folder_id = self.folder_ids[selected_folder_id[0]]
             print(folder_id)
-            # Haetaan kaikki kansion tehtävät tietokannasta.
+            # Haetaan kaikki kansiot task_controllerin avulla ja tallennetaan ne muuttujaan.
             tasks = self.task_controller.get_tasks_by_folder_id(folder_id)
             print(tasks)
 
             self.return_to_mainview_button.pack() # Näytetään painike, joka mahdollistaa palaamisen alkunäyttötilaan.
-            
-            self.tasks_listbox.delete(0, tk.END) # Tyhjennetään tehtävälista.
+            self.tasks_listbox.delete(0, tk.END) # Tyhjennetään tehtävälista, ennen kuin lisätään uudet tehtävät.
 
+            # Käydään haetut tehtävät läpi ja lisätään ne Listbox-komponenttiin niiden näyttämiseksi.
             for task in tasks:
                 # Muodostetaan tehtävän tiedot merkkijonoksi.
                 task_display = f"{task['title']}, {task['description']}, Due Date: {task['due_date']}"
                 self.tasks_listbox.insert(tk.END, task_display) # Lisätään tehtävä Listbox-komponenttiin.
 
 
+    # Metodi, jonka avulla valittu tehtävä voidaan poistaa.
     def delete_task(self):
         # Haetaan valitun tehtävän ID Listbox-komponentista.
         selected_task_id = self.tasks_listbox.curselection()
         print(selected_task_id)
 
+        # Jos tehtävä on valittu, poistetaan se tietokannasta.
         if selected_task_id:
-            # Haetaan valitun tehtävän sisältö (otsikko ja due date).
+
+            # Haetaan valitun tehtävän kaikki näkyvät tiedot Listbox-komponentista ja tallennetaan ne muuttujaan.
             task_text = self.tasks_listbox.get(selected_task_id)
             print(task_text)
-            # Haetaan tehtävän otsikko poistamalla ylimääräinen sisältö task_text.
+
+            # Erotetaan tehtävän otsikko task_text muuttujasta. Otsikko on ensimmäinen osa, joka erotetaan pilkulla ',' ja välilyönnillä.
+            # Tämä tehdään, jotta otsikko saadaan helposti poistamista varten.
             task_title = task_text.split(",")[0]
             print(task_title)
-            # Haetaan tehtävä tietokannasta task_controllerin avulla.
+
+            # Haetaan tehtävän tiedot task_controllerin avulla ja tallennetaan se muuttujaan, jotta se voidaan poistaa sen otsikon perusteella.
             task_to_delete = self.task_controller.delete_task_by_title(task_title)
 
             
             # Jos tehtävä löytyy, poistetaan se tietokannasta task_controllerin avulla.
             if task_to_delete:
-                task_id = task_to_delete['id'] # Tallennetaan tehtävän ID muuttujaan.
-                self.task_controller.delete_task(task_id) # Poistetaan tehtävä tietokannasta.
+                task_id = task_to_delete['id'] # Tallennetaan tehtävän ID muuttujaan, jotta sitä voidaan käyttää poistamisessa.
+                self.task_controller.delete_task(task_id) # Poistetaan tehtävä tietokannasta task_controllerin avulla, joka käyttää delete_task metodia.
                 self.refresh_tasks() # Päivitetään tehtävät GUI:ssa.
             else:
                 messagebox.showerror("Error", "Task not found")
@@ -212,8 +220,7 @@ class MainView:
 
     # Metodi näyttää kaikki tehtävät GUI:ssa, käytetään kun halutaan palata alkunäyttötilaan folder näkymästä.
     def show_all_tasks(self):
-
-        self.return_to_mainview_button.pack_forget() # Piilotetaan painike, kun se ei ole tarpeellinen, eli kun palataan päänäyttöön.
+        self.return_to_mainview_button.pack_forget() # Piilotetaan painike pack_forget() metodilla, kun se ei ole enää tarpeellinen.
         self.refresh_tasks() # Päivitetään tehtävät GUI:ssa.
 
 
@@ -241,12 +248,13 @@ class MainView:
             else:
                 messagebox.showerror("Error", "Folder name cannot be empty") # Jos kansion nimi on tyhjä, näytetään virheilmoitus messagebox widgetillä.
 
-        # Luodaan painike, joka kutsuu save_folder metodia ja mahdollistaa kansion tallentamisen.
+        # Luodaan painike, joka kutsuu save_folder metodia painettaessa ja mahdollistaa kansion tallentamisen.
         tk.Button(create_folder_window, text="Save Folder", command=save_folder).pack() 
 
 
+    # Metodi, jonka avulla valittu kansio voidaan poistaa.
     def delete_folder(self):
-        # Haetaan valitun kansion ID Listbox-komponentista.
+        # Haetaan valitun kansion ID Listbox-komponentista ja tallennetaan se muuttujaan.
         selected_folder_id = self.folders_listbox.curselection()
         if selected_folder_id:
             # Haetaan valitun kansion nimi Listbox-komponentista.
