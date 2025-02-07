@@ -55,17 +55,27 @@ class MainView:
     # Metodi luo GUI:n komponentit.
     def create_widgets(self):
 
+        #TASK Buttons
+
+        # Luodaan Frame-komponentti, painikkeiden sijoittamista varten.
+        task_button_frame = tk.Frame(self.root)
+        task_button_frame.pack(fill=tk.X, padx=20, pady=5)
+        task_button_frame.pack_propagate(False)
+        
         # Luodaan painike, joka kutsuu create_task metodia ja mahdollistaa uuden tehtävän luomisen.
-        self.create_task_button = tk.Button(self.root, text="Create Task", command=self.create_task)
-        self.create_task_button.pack()
+        self.create_task_button = tk.Button(task_button_frame, text="Create Task", command=self.create_task)
+        self.create_task_button.grid(row=0, column=0, padx=5)
 
         # Luodaan painike, joka kutsuu delete_task metodia ja mahdollistaa tehtävän poistamisen.
-        self.delete_task_button = tk.Button(self.root, text="Delete Task", command=self.delete_task)
-        self.delete_task_button.pack()
+        self.delete_task_button = tk.Button(task_button_frame, text="Delete Task", command=self.delete_task)
+        self.delete_task_button.grid(row=0, column=1, padx=5)
 
         # Luodaan Listbox-komponentti, johon lisätään tehtävät.
         self.tasks_listbox = tk.Listbox(self.root)
-        self.tasks_listbox.pack(fill=tk.BOTH, expand=True)
+        self.tasks_listbox.pack(fill=tk.BOTH, expand=True, padx=20, pady=5)
+
+
+        #FOLDER Buttons
 
         # Luodaan painike, joka kutsuu create_folder metodia ja mahdollistaa uuden kansion luomisen.
         self.create_folder_button = tk.Button(self.root, text="Create Folder", command=self.create_folder)
@@ -82,7 +92,7 @@ class MainView:
 
         # Luodaan Listbox-komponentti, johon lisätään kansiot.
         self.folders_listbox = tk.Listbox(self.root)
-        self.folders_listbox.pack(fill=tk.BOTH, expand=True)
+        self.folders_listbox.pack(fill=tk.BOTH, expand=True, padx=20, pady=5)
 
         # Listbox-komponenttiin lisätään tapahtumankäsittelijä, joka kutsuu display_tasks_in_folder metodia, kun käyttäjä valitsee kansion.
         self.folders_listbox.bind("<<ListboxSelect>>", self.display_tasks_in_folder)

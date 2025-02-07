@@ -32,6 +32,9 @@ class SQLTaskController:
         due_today = [] # Luodaan lista, johon lisätään erääntyvät tehtävät
 
         # Käydään läpi kaikki tehtävät ja tarkistetaan, onko niiden deadline tänään
+
+        #return [ {'title': task[2], 'due_date': task[4]} for task in tasks if datetime.strptime(task[4], "%Y-%m-%d").date() == today]
+    
         for task in tasks:
             due_date = datetime.strptime(task[4], "%Y-%m-%d").date() # Muodonmuutos päivämäärästä string muotoon
             if due_date == today:
