@@ -57,7 +57,7 @@ class MainView:
 
         #TASK Buttons
 
-        # Luodaan Frame-komponentti, painikkeiden sijoittamista varten.
+        # Luodaan Frame-komponentti, task painikkeiden sijoittamista varten.
         task_button_frame = tk.Frame(self.root)
         task_button_frame.pack(fill=tk.X, padx=20, pady=5)
         task_button_frame.pack_propagate(False)
@@ -74,16 +74,18 @@ class MainView:
         self.tasks_listbox = tk.Listbox(self.root)
         self.tasks_listbox.pack(fill=tk.BOTH, expand=True, padx=20, pady=5)
 
-
-        #FOLDER Buttons
+        # Luodaan Frame-komponentti, folder painikkeiden sijoittamista varten.
+        folder_button_frame = tk.Frame(self.root)
+        folder_button_frame.pack(fill=tk.X, padx=20, pady=5)
+        folder_button_frame.pack_propagate(False)
 
         # Luodaan painike, joka kutsuu create_folder metodia ja mahdollistaa uuden kansion luomisen.
-        self.create_folder_button = tk.Button(self.root, text="Create Folder", command=self.create_folder)
-        self.create_folder_button.pack()
+        self.create_folder_button = tk.Button(folder_button_frame, text="Create Folder", command=self.create_folder)
+        self.create_folder_button.grid(row=0, column=0, padx=5)
 
         # Luodaan painike, joka kutsuu delete_folder metodia ja mahdollistaa kansion poistamisen.
-        self.delete_folder_button = tk.Button(self.root, text="Delete Folder", command=self.delete_folder)
-        self.delete_folder_button.pack()
+        self.delete_folder_button = tk.Button(folder_button_frame, text="Delete Folder", command=self.delete_folder)
+        self.delete_folder_button.grid(row=0, column=1, padx=5)
 
         # Luodaan painike, joka kutsuu show_all_tasks metodia ja mahdollistaa palaamisen alkunäyttötilaan.
         self.return_to_mainview_button = tk.Button(self.root, text="Return to Main View", command=self.show_all_tasks)
@@ -100,7 +102,6 @@ class MainView:
         # Päivitetään tehtävät ja kansiot, jotta ne saadaan näkyviin.
         self.refresh_tasks()
         self.refresh_folders()
-
 
     # Metodi tarkistaa onko tehtävän deadline mennyt.
     def check_due_dates(self):
